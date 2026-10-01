@@ -1,8 +1,9 @@
 const form = document.getElementById("taskForm");
 const input = document.getElementById("taskInput");
-const list = document.getElementById("tasksList");
-const tasksCount = document.getElementById("tasksCount");
+const pendingList = document.getElementById("pendingList");
+const completedList = document.getElementById("completedList");
 const completedCount = document.getElementById("completedCount");
+const remainingCount = document.getElementById("remainingCount");
 
 // Load saved tasks (empty array if nothing saved or data is broken)
 let tasks = [];
@@ -42,12 +43,33 @@ function createButton(label, className, index) {
     return button;
 }
 
-function displayTasks() {
-    list.innerHTML = "";
+function createCell(content, className) {
+    const cell = document.createElement("td");
+    if (className) cell.className = className;
+    cell.append(content);
+    return cell;
+}
 
+function emptyRow(text, colspan) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = colspan;
+    cell.className = "empty";
+    cell.textContent = text;
+    row.appendChild(cell);
+    return row;
+}
+
+function displayTasks() {
+    pendingList.innerHTML = "";
+    completedList.innerHTML = "";
+
+    let completed = 0;
+    let remaining = 0;
+
+    // index = position in the main tasks array (used by the buttons)
     tasks.forEach(function (task, index) {
-        const item = document.createElement("div");
-        item.className = "task" + (task.completed ? " completed" : "");
+        const row = document.createElement("tr");
 
         // textContent (not innerHTML) so user text can never run as HTML/JS
         const name = document.createElement("span");
@@ -55,26 +77,37 @@ function displayTasks() {
 
         const actions = document.createElement("div");
         actions.className = "task-actions";
-        actions.append(
-            createButton("Complete", "complete", index),
-            createButton("Delete", "delete", index)
-        );
 
-        item.append(name, actions);
-        list.appendChild(item);
+        if (task.completed) {
+            completed++;
+            actions.append(createButton("Delete", "delete", index));
+            row.append(
+                createCell(name, "name"),
+                createCell("Done", "status-col"),
+                createCell(actions, "actions-col")
+            );
+            completedList.appendChild(row);
+        } else {
+            remaining++;
+            actions.append(
+                createButton("Complete", "complete", index),
+                createButton("Delete", "delete", index)
+            );
+            row.append(createCell(name, "name"), createCell(actions, "actions-col"));
+            pendingList.appendChild(row);
+        }
     });
 
-    const completed = tasks.filter(function (task) {
-        return task.completed;
-    }).length;
+    if (remaining === 0) pendingList.appendChild(emptyRow("No tasks left", 2));
+    if (completed === 0) completedList.appendChild(emptyRow("Nothing completed yet", 3));
 
-    tasksCount.textContent = `Tasks: ${tasks.length}`;
     completedCount.textContent = `Completed: ${completed}`;
+    remainingCount.textContent = `Remaining: ${remaining}`;
 }
 
-// One listener for all buttons (event delegation)
-list.addEventListener("click", function (event) {
-    const button = event.target.closest("button");
+// One listener for both tables (event delegation)
+document.addEventListener("click", function (event) {
+    const button = event.target.closest("td button");
     if (!button) return;
 
     const index = Number(button.dataset.index);

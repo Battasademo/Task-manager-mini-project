@@ -16,13 +16,25 @@
         <button type="submit">Add task</button>
     </form>
 
-    <h2>Tasks:</h2>
+    <h2>To do</h2>
+    <table id="pendingTable">
+        <thead>
+            <tr><th>Task</th><th class="actions-col">Actions</th></tr>
+        </thead>
+        <tbody id="pendingList"></tbody>
+    </table>
 
-    <div id="tasksList"></div>
+    <h2>Completed</h2>
+    <table id="completedTable">
+        <thead>
+            <tr><th>Task</th><th class="status-col">Status</th><th class="actions-col">Actions</th></tr>
+        </thead>
+        <tbody id="completedList"></tbody>
+    </table>
 
     <div class="counters">
-        <p id="tasksCount">Tasks: 0</p>
         <p id="completedCount">Completed: 0</p>
+        <p id="remainingCount">Remaining: 0</p>
     </div>
 
 </body>
